@@ -73,7 +73,7 @@ function addQuote() {
   postQuoteToServer(newQuote);
 }
 
-// 🔹 Required by ALX: async fetch from server
+// Required by ALX: async fetch from server
 async function fetchQuotesFromServer() {
   const res = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=5');
   const data = await res.json();
@@ -83,7 +83,7 @@ async function fetchQuotesFromServer() {
   }));
 }
 
-// 🔹 Required by ALX: async post to mock server
+// Required by ALX: async post to mock server
 async function postQuoteToServer(quote) {
   try {
     const res = await fetch('https://jsonplaceholder.typicode.com/posts', {
@@ -100,7 +100,7 @@ async function postQuoteToServer(quote) {
   }
 }
 
-// 🔹 Required by ALX: syncQuotes using async/await
+// Required by ALX: syncQuotes using async/await
 async function syncQuotes() {
   try {
     const serverQuotes = await fetchQuotesFromServer();
@@ -114,6 +114,8 @@ async function syncQuotes() {
       filterQuotes();
       syncStatus.textContent = "✔ Synced with server.";
       conflictNotice.hidden = false;
+    } else {
+      syncStatus.textContent = "✔ No new updates from server.";
     }
   } catch (err) {
     console.error("Sync failed:", err);
