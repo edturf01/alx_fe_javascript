@@ -61,65 +61,64 @@ function addQuote() {
     return;
   }
 
-  quotes.push({ text, category });
+  const newQuote = { text, category };
+  quotes.push(newQuote);
   localStorage.setItem("quotes", JSON.stringify(quotes));
   populateCategories();
   alert("Quote added successfully!");
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
 
-  // Simulate POST to mock API
-  postQuoteToServer({ text, category });
+  // Post new quote to server (mock)
+  postQuoteToServer(newQuote);
 }
 
-// 🔹 Required by ALX: fetchQuotesFromServer()
-function fetchQuotesFromServer() {
-  return fetch('https://jsonplaceholder.typicode.com/posts?_limit=5')
-    .then(res => res.json())
-    .then(data => {
-      return data.map(item => ({
-        text: item.title,
-        category: 'server'
-      }));
-    });
+// 🔹 Required by ALX: async fetch from server
+async function fetchQuotesFromServer() {
+  const res = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=5');
+  const data = await res.json();
+  return data.map(item => ({
+    text: item.title,
+    category: 'server'
+  }));
 }
 
-// 🔹 Required by ALX: postQuoteToServer() mock
-function postQuoteToServer(quote) {
-  fetch('https://jsonplaceholder.typicode.com/posts', {
-    method: 'POST',
-    body: JSON.stringify(quote),
-    headers: {
-      'Content-type': 'application/json; charset=UTF-8'
-    }
-  })
-    .then(response => response.json())
-    .then(data => {
-      console.log("Posted to server:", data);
-    })
-    .catch(err => console.error("Post failed:", err));
-}
-
-// 🔹 Required by ALX: syncQuotes()
-function syncQuotes() {
-  fetchQuotesFromServer()
-    .then(serverQuotes => {
-      const existingTexts = new Set(quotes.map(q => q.text));
-      const newQuotes = serverQuotes.filter(q => !existingTexts.has(q.text));
-
-      if (newQuotes.length > 0) {
-        quotes = [...quotes, ...newQuotes];
-        localStorage.setItem("quotes", JSON.stringify(quotes));
-        populateCategories();
-        filterQuotes();
-        syncStatus.textContent = "✔ Synced with server.";
-        conflictNotice.hidden = false;
+// 🔹 Required by ALX: async post to mock server
+async function postQuoteToServer(quote) {
+  try {
+    const res = await fetch('https://jsonplaceholder.typicode.com/posts', {
+      method: 'POST',
+      body: JSON.stringify(quote),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8'
       }
-    })
-    .catch(err => {
-      console.error("Sync failed:", err);
-      syncStatus.textContent = "⚠ Sync failed.";
     });
+    const data = await res.json();
+    console.log("Posted to server:", data);
+  } catch (err) {
+    console.error("Post failed:", err);
+  }
+}
+
+// 🔹 Required by ALX: syncQuotes using async/await
+async function syncQuotes() {
+  try {
+    const serverQuotes = await fetchQuotesFromServer();
+    const existingTexts = new Set(quotes.map(q => q.text));
+    const newQuotes = serverQuotes.filter(q => !existingTexts.has(q.text));
+
+    if (newQuotes.length > 0) {
+      quotes = [...quotes, ...newQuotes];
+      localStorage.setItem("quotes", JSON.stringify(quotes));
+      populateCategories();
+      filterQuotes();
+      syncStatus.textContent = "✔ Synced with server.";
+      conflictNotice.hidden = false;
+    }
+  } catch (err) {
+    console.error("Sync failed:", err);
+    syncStatus.textContent = "⚠ Sync failed.";
+  }
 }
 
 function exportToJsonFile() {
