@@ -1,5 +1,3 @@
-// Simple Dynamic Quote Generator using DOM manipulation only
-
 const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteBtn = document.getElementById("newQuote");
 
@@ -9,7 +7,7 @@ let quotes = [
   { text: "Simplicity is the ultimate sophistication.", category: "design" },
 ];
 
-function displayRandomQuote(category = "all") {
+function showRandomQuote(category = "all") {
   const filtered = category === "all" ? quotes : quotes.filter(q => q.category === category);
   if (filtered.length === 0) {
     quoteDisplay.textContent = "No quotes available for this category.";
@@ -59,7 +57,7 @@ function createAddQuoteForm() {
 function createCategoryFilter() {
   const filter = document.createElement("select");
   filter.id = "categoryFilter";
-  filter.onchange = () => displayRandomQuote(filter.value);
+  filter.onchange = () => showRandomQuote(filter.value);
   document.body.insertBefore(filter, quoteDisplay);
   updateCategoryOptions();
 }
@@ -76,10 +74,9 @@ function updateCategoryOptions() {
   });
 }
 
-// Init
 document.addEventListener("DOMContentLoaded", () => {
   createCategoryFilter();
   createAddQuoteForm();
-  displayRandomQuote();
-  newQuoteBtn.addEventListener("click", () => displayRandomQuote(document.getElementById("categoryFilter").value));
+  showRandomQuote();
+  newQuoteBtn.addEventListener("click", () => showRandomQuote(document.getElementById("categoryFilter").value));
 });
