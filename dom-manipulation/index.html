@@ -4,39 +4,46 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dynamic Quote Generator</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    #quoteDisplay { font-size: 1.2rem; margin: 20px 0; }
+    #conflictNotice { color: red; margin-top: 10px; }
+    .form-group { margin-bottom: 10px; }
+    select, input, button { padding: 6px; font-size: 1rem; }
+  </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
 
-  <!-- Category Filter -->
-  <div>
+  <div class="form-group">
     <label for="categoryFilter">Filter by Category:</label>
     <select id="categoryFilter" onchange="filterQuotes()">
       <option value="all">All Categories</option>
     </select>
-    <button id="newQuote">Show Random Quote</button>
   </div>
 
-  <!-- Quote Display -->
-  <div id="quoteDisplay" style="margin: 20px 0; font-size: 1.2em; font-style: italic;"></div>
+  <div id="quoteDisplay">Your quote will appear here.</div>
 
-  <!-- Sync Notification -->
-  <p id="syncStatus" style="color: green; font-weight: bold;"></p>
+  <button id="newQuote">Show New Quote</button>
 
-  <!-- Add Quote Form -->
   <h3>Add a New Quote</h3>
-  <div>
+  <div class="form-group">
     <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-    <button onclick="addQuote()">Add Quote</button>
   </div>
+  <div class="form-group">
+    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+  </div>
+  <button onclick="addQuote()">Add Quote</button>
 
-  <!-- Export / Import -->
-  <hr />
   <h3>Manage Quotes</h3>
+  <div class="form-group">
+    <input type="file" id="importFile" />
+    <button onclick="importFromJsonFile()">Import Quotes</button>
+  </div>
   <button onclick="exportToJsonFile()">Export Quotes</button>
-  <input type="file" id="importFile" />
-  <button onclick="importFromJsonFile()">Import Quotes</button>
+
+  <p id="syncStatus">🔄 Syncing...</p>
+  <p id="conflictNotice" hidden>⚠ New quotes fetched from server and added.</p>
 
   <script src="script.js"></script>
 </body>
