@@ -1,5 +1,11 @@
 let quotes = [];
+let lastSyncTime = null;
 
+const quoteDisplay = document.getElementById("quoteDisplay");
+const categoryFilter = document.getElementById("categoryFilter");
+const syncStatus = document.getElementById("syncStatus");
+
+// Load local quotes or fallback to default
 if (localStorage.getItem("quotes")) {
   quotes = JSON.parse(localStorage.getItem("quotes"));
 } else {
@@ -8,12 +14,9 @@ if (localStorage.getItem("quotes")) {
     { text: "Do or do not. There is no try.", category: "motivation" },
     { text: "Simplicity is the ultimate sophistication.", category: "design" },
   ];
+  localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 
-const quoteDisplay = document.getElementById("quoteDisplay");
-const categoryFilter = document.getElementById("categoryFilter");
-
-// Load and remember filter selection
 function populateCategories() {
   const uniqueCategories = [...new Set(quotes.map(q => q.category))];
   categoryFilter.innerHTML = '<option value="all">All Categories</option>';
@@ -24,7 +27,6 @@ function populateCategories() {
     categoryFilter.appendChild(option);
   });
 
-  // Restore selected filter from storage
   const savedFilter = localStorage.getItem("selectedCategory");
   if (savedFilter) {
     categoryFilter.value = savedFilter;
@@ -62,10 +64,41 @@ function addQuote() {
 
   quotes.push({ text, category });
   localStorage.setItem("quotes", JSON.stringify(quotes));
-  populateCategories(); // Refresh categories
+  populateCategories();
+  alert("Quote added successfully!");
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
-  alert("Quote added successfully!");
+}
+
+// --- Simulate Fetch from Server (e.g. mock API) ---
+function fetchFromServer() {
+  fetch('https://jsonplaceholder.typicode.com/posts?_limit=5')
+    .then(res => res.json())
+    .then(data => {
+      const serverQuotes = data.map(item => ({
+        text: item.title,
+        category: 'server' // Default category
+      }));
+
+      // Conflict Resolution: Server Wins
+      quotes = mergeServerQuotes(serverQuotes, quotes);
+      localStorage.setItem("quotes", JSON.stringify(quotes));
+      populateCategories();
+      filterQuotes();
+
+      syncStatus.textContent = "✔ Synced with server.";
+      setTimeout(() => syncStatus.textContent = "", 3000);
+    })
+    .catch(err => {
+      console.error("Sync failed:", err);
+      syncStatus.textContent = "⚠ Failed to sync with server.";
+    });
+}
+
+function mergeServerQuotes(server, local) {
+  const existingTexts = new Set(local.map(q => q.text));
+  const newOnes = server.filter(sq => !existingTexts.has(sq.text));
+  return [...local, ...newOnes]; // Merge
 }
 
 function exportToJsonFile() {
@@ -104,5 +137,10 @@ function importFromJsonFile() {
   reader.readAsText(file);
 }
 
+document.getElementById("newQuote").addEventListener("click", filterQuotes);
+
+// --- INIT ---
 populateCategories();
 filterQuotes();
+fetchFromServer(); // Initial sync
+setInterval(fetchFromServer, 15000); // Re-sync every 15 seconds

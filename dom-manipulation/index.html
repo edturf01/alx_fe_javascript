@@ -8,15 +8,22 @@
 <body>
   <h1>Dynamic Quote Generator</h1>
 
+  <!-- Category Filter -->
   <div>
     <label for="categoryFilter">Filter by Category:</label>
     <select id="categoryFilter" onchange="filterQuotes()">
       <option value="all">All Categories</option>
     </select>
+    <button id="newQuote">Show Random Quote</button>
   </div>
 
+  <!-- Quote Display -->
   <div id="quoteDisplay" style="margin: 20px 0; font-size: 1.2em; font-style: italic;"></div>
 
+  <!-- Sync Notification -->
+  <p id="syncStatus" style="color: green; font-weight: bold;"></p>
+
+  <!-- Add Quote Form -->
   <h3>Add a New Quote</h3>
   <div>
     <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
@@ -24,6 +31,7 @@
     <button onclick="addQuote()">Add Quote</button>
   </div>
 
+  <!-- Export / Import -->
   <hr />
   <h3>Manage Quotes</h3>
   <button onclick="exportToJsonFile()">Export Quotes</button>
