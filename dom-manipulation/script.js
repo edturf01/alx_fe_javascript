@@ -1,11 +1,10 @@
 let quotes = [];
-let lastSyncTime = null;
-
 const quoteDisplay = document.getElementById("quoteDisplay");
 const categoryFilter = document.getElementById("categoryFilter");
 const syncStatus = document.getElementById("syncStatus");
+const conflictNotice = document.getElementById("conflictNotice");
 
-// Load local quotes or fallback to default
+// Load from localStorage
 if (localStorage.getItem("quotes")) {
   quotes = JSON.parse(localStorage.getItem("quotes"));
 } else {
@@ -68,37 +67,59 @@ function addQuote() {
   alert("Quote added successfully!");
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
+
+  // Simulate POST to mock API
+  postQuoteToServer({ text, category });
 }
 
-// --- Simulate Fetch from Server (e.g. mock API) ---
-function fetchFromServer() {
-  fetch('https://jsonplaceholder.typicode.com/posts?_limit=5')
+// 🔹 Required by ALX: fetchQuotesFromServer()
+function fetchQuotesFromServer() {
+  return fetch('https://jsonplaceholder.typicode.com/posts?_limit=5')
     .then(res => res.json())
     .then(data => {
-      const serverQuotes = data.map(item => ({
+      return data.map(item => ({
         text: item.title,
-        category: 'server' // Default category
+        category: 'server'
       }));
-
-      // Conflict Resolution: Server Wins
-      quotes = mergeServerQuotes(serverQuotes, quotes);
-      localStorage.setItem("quotes", JSON.stringify(quotes));
-      populateCategories();
-      filterQuotes();
-
-      syncStatus.textContent = "✔ Synced with server.";
-      setTimeout(() => syncStatus.textContent = "", 3000);
-    })
-    .catch(err => {
-      console.error("Sync failed:", err);
-      syncStatus.textContent = "⚠ Failed to sync with server.";
     });
 }
 
-function mergeServerQuotes(server, local) {
-  const existingTexts = new Set(local.map(q => q.text));
-  const newOnes = server.filter(sq => !existingTexts.has(sq.text));
-  return [...local, ...newOnes]; // Merge
+// 🔹 Required by ALX: postQuoteToServer() mock
+function postQuoteToServer(quote) {
+  fetch('https://jsonplaceholder.typicode.com/posts', {
+    method: 'POST',
+    body: JSON.stringify(quote),
+    headers: {
+      'Content-type': 'application/json; charset=UTF-8'
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Posted to server:", data);
+    })
+    .catch(err => console.error("Post failed:", err));
+}
+
+// 🔹 Required by ALX: syncQuotes()
+function syncQuotes() {
+  fetchQuotesFromServer()
+    .then(serverQuotes => {
+      const existingTexts = new Set(quotes.map(q => q.text));
+      const newQuotes = serverQuotes.filter(q => !existingTexts.has(q.text));
+
+      if (newQuotes.length > 0) {
+        quotes = [...quotes, ...newQuotes];
+        localStorage.setItem("quotes", JSON.stringify(quotes));
+        populateCategories();
+        filterQuotes();
+        syncStatus.textContent = "✔ Synced with server.";
+        conflictNotice.hidden = false;
+      }
+    })
+    .catch(err => {
+      console.error("Sync failed:", err);
+      syncStatus.textContent = "⚠ Sync failed.";
+    });
 }
 
 function exportToJsonFile() {
@@ -137,10 +158,11 @@ function importFromJsonFile() {
   reader.readAsText(file);
 }
 
+// Event Listeners
 document.getElementById("newQuote").addEventListener("click", filterQuotes);
 
-// --- INIT ---
+// Initialize
 populateCategories();
 filterQuotes();
-fetchFromServer(); // Initial sync
-setInterval(fetchFromServer, 15000); // Re-sync every 15 seconds
+syncQuotes(); // Initial sync
+setInterval(syncQuotes, 15000); // Periodic sync every 15s
