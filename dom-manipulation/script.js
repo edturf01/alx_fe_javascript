@@ -112,7 +112,7 @@ async function syncQuotes() {
       localStorage.setItem("quotes", JSON.stringify(quotes));
       populateCategories();
       filterQuotes();
-      syncStatus.textContent = "✔ Synced with server.";
+      syncStatus.textContent = "Quotes synced with server!";
       conflictNotice.hidden = false;
     } else {
       syncStatus.textContent = "✔ No new updates from server.";
