@@ -8,17 +8,27 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      max-width: 600px;
-      margin: auto;
+    }
+    #notification {
+      display: none;
+      background-color: #e6ffed;
+      color: #2c662d;
+      padding: 10px;
+      margin: 15px 0;
+      border-left: 4px solid #2c662d;
+      border-radius: 4px;
     }
     #quoteDisplay {
+      margin-top: 20px;
       font-size: 1.2rem;
-      margin: 20px 0;
+      font-style: italic;
     }
-    input, select, button {
-      padding: 8px;
+    .controls {
+      margin-top: 20px;
+    }
+    .controls input, .controls button, .controls select {
       margin: 5px 0;
-      width: 100%;
+      padding: 8px;
       font-size: 1rem;
     }
   </style>
@@ -26,23 +36,35 @@
 <body>
   <h1>Dynamic Quote Generator</h1>
 
-  <div id="quoteDisplay">Your quote will appear here.</div>
+  <!-- Category Filter -->
+  <label for="categoryFilter">Filter by Category:</label>
+  <select id="categoryFilter" onchange="filterQuotes()">
+    <option value="all">All Categories</option>
+  </select>
+
+  <!-- Quote Display Area -->
+  <div id="quoteDisplay">Click "Show New Quote" to begin.</div>
   <button id="newQuote">Show New Quote</button>
 
-  <div>
+  <!-- Notification Area -->
+  <div id="notification"></div>
+
+  <!-- Add Quote Form -->
+  <div class="controls">
+    <h3>Add New Quote</h3>
     <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
     <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
     <button onclick="addQuote()">Add Quote</button>
   </div>
 
-  <select id="categoryFilter" onchange="showRandomQuote(this.value)">
-    <option value="all">All Categories</option>
-  </select>
+  <!-- Import/Export Buttons -->
+  <div class="controls">
+    <h3>Import/Export Quotes</h3>
+    <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+    <button onclick="exportQuotes()">Export Quotes</button>
+  </div>
 
-  <hr />
-  <button onclick="exportQuotes()">Export Quotes (JSON)</button>
-  <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
-
+  <!-- Script -->
   <script src="script.js"></script>
 </body>
 </html>

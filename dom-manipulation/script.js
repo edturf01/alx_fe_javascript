@@ -1,8 +1,11 @@
 const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteBtn = document.getElementById("newQuote");
 const categoryFilter = document.getElementById("categoryFilter");
+const notification = document.getElementById("notification");
 
 let quotes = [];
+
+const API_URL = "https://jsonplaceholder.typicode.com/posts"; // Simulated endpoint
 
 function loadQuotes() {
   const saved = localStorage.getItem("quotes");
@@ -26,11 +29,24 @@ function addQuote() {
     return;
   }
 
-  quotes.push({ text, category });
+  const newQ = { text, category };
+  quotes.push(newQ);
   saveQuotes();
   populateCategories();
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
+
+  // Simulate posting to server
+  fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(newQ)
+  })
+    .then(() => showNotification("Quote added and synced with server!"))
+    .catch(() => showNotification("Quote added locally (server sync failed)"));
+
   alert("Quote added!");
 }
 
@@ -43,8 +59,6 @@ function showRandomQuote(category = "all") {
 
   const random = filtered[Math.floor(Math.random() * filtered.length)];
   quoteDisplay.textContent = random.text;
-
-  // Save last viewed quote to session storage
   sessionStorage.setItem("lastViewedQuote", random.text);
 }
 
@@ -58,15 +72,44 @@ function populateCategories() {
     categoryFilter.appendChild(option);
   });
 
-  // Restore last selected filter
   const savedFilter = localStorage.getItem("selectedCategory") || "all";
   categoryFilter.value = savedFilter;
 }
 
 function filterQuotes() {
   const selected = categoryFilter.value;
-  localStorage.setItem("selectedCategory", selected); // Save selected category
+  localStorage.setItem("selectedCategory", selected);
   showRandomQuote(selected);
+}
+
+function syncQuotes() {
+  fetch(API_URL)
+    .then(response => response.json())
+    .then(serverQuotes => {
+      // Simulate extracting text/category from fake API
+      const incoming = serverQuotes.slice(0, 5).map(q => ({
+        text: q.title,
+        category: "synced"
+      }));
+
+      const newQuotes = incoming.filter(serverQ =>
+        !quotes.some(localQ => localQ.text === serverQ.text)
+      );
+
+      if (newQuotes.length > 0) {
+        quotes.push(...newQuotes);
+        saveQuotes();
+        populateCategories();
+        showNotification("Quotes synced with server!");
+      }
+    })
+    .catch(() => showNotification("Failed to sync with server"));
+}
+
+function showNotification(message) {
+  notification.textContent = message;
+  notification.style.display = "block";
+  setTimeout(() => (notification.style.display = "none"), 4000);
 }
 
 function exportQuotes() {
@@ -91,7 +134,7 @@ function importFromJsonFile(event) {
       saveQuotes();
       populateCategories();
       alert("Quotes imported successfully!");
-    } catch (err) {
+    } catch {
       alert("Error importing quotes. Please check the file format.");
     }
   };
@@ -101,12 +144,12 @@ function importFromJsonFile(event) {
 document.addEventListener("DOMContentLoaded", () => {
   loadQuotes();
   populateCategories();
-
-  // Restore last viewed quote or show random
-  const last = sessionStorage.getItem("lastViewedQuote");
-  quoteDisplay.textContent = last || "Click to view a quote";
+  showRandomQuote(localStorage.getItem("selectedCategory") || "all");
 
   newQuoteBtn.addEventListener("click", () => {
     filterQuotes();
   });
+
+  // Sync every 30 seconds
+  setInterval(syncQuotes, 30000);
 });
