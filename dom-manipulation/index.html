@@ -26,11 +26,22 @@
 <body>
   <h1>Dynamic Quote Generator</h1>
 
-  <!-- Category filter will be inserted here by JS -->
   <div id="quoteDisplay">Your quote will appear here.</div>
   <button id="newQuote">Show New Quote</button>
 
-  <!-- Add Quote Form will be inserted here by JS -->
+  <div>
+    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+    <button onclick="addQuote()">Add Quote</button>
+  </div>
+
+  <select id="categoryFilter" onchange="showRandomQuote(this.value)">
+    <option value="all">All Categories</option>
+  </select>
+
+  <hr />
+  <button onclick="exportQuotes()">Export Quotes (JSON)</button>
+  <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
 
   <script src="script.js"></script>
 </body>
